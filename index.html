@@ -275,7 +275,7 @@ input[type="date"] {
 
 @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 </style>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.44.0/dist/tabler-icons.min.css">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght=400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
@@ -287,10 +287,10 @@ input[type="date"] {
     
     <div id="gateway-selection-block" style="display: flex; flex-direction: column; gap: 14px;">
       <button id="gate-btn-visitor" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 14px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: 500; transition: background 0.2s;">
-        <i class="ti ti-eye"></i> Visitor Login (View Only)
+        <i class="ti ti-eye" style="font-size: 25px; color: rgba(255,0,0,0.75); text-shadow: none; "></i> Visitor Login (View Only)
       </button>
       <button id="gate-btn-admin-prompt" style="background: #928ae9; border: none; color: #fff; padding: 14px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: 500; transition: background 0.2s;">
-        <i class="ti ti-shield-lock"></i> Admin Login (Read/Write)
+        <i class="ti ti-info-triangle" style="font-size: 25px; color: rgba(255,0,0,0.75); text-shadow: none; "></i> Admin Login (Read/Write)
       </button>
     </div>
 
@@ -310,22 +310,22 @@ input[type="date"] {
     <div class="sidebar-logo">My<span>Space</span></div>
     
     <div class="nav-section">Execution Engine</div>
-    <div class="nav-item active" id="nav-dashboard" onclick="showPanel('dashboard')"><i class="ti ti-layout-dashboard"></i> Dashboard</div>
-    <div class="nav-item" id="nav-checkin" onclick="showPanel('checkin')"><i class="ti ti-table"></i> Check-In</div>
+    <div class="nav-item active" id="nav-dashboard" onclick="showPanel('dashboard')"><i class="ti ti-home" style="font-size: 25px; color: rgba(255,0,0,0.75); text-shadow: none; "></i> Dashboard</div>
+    <div class="nav-item" id="nav-checkin" onclick="showPanel('checkin')"><i class="ti ti-checkup-list" style="font-size: 25px; color: rgba(255,0,0,0.75); text-shadow: none; "></i> Check-In</div>
     
     <div class="nav-section">Data Management</div>
-    <div class="nav-item" id="nav-routine" onclick="showPanel('routine')"><i class="ti ti-settings-automation"></i> Routine Manager</div>
-    <div class="nav-item" id="nav-notes" onclick="showPanel('notes')"><i class="ti ti-notebook"></i> Notes Grid</div>
-    <div class="nav-item" id="nav-todos" onclick="showPanel('todos')"><i class="ti ti-checklist"></i> To-Do Tiles</div>
-    <div class="nav-item" id="nav-study" onclick="showPanel('study')"><i class="ti ti-stopwatch"></i> Study Timers</div>
-    <div class="nav-item" id="nav-history" onclick="showPanel('history')"><i class="ti ti-spreadsheet"></i> Matrix History</div>
+    <div class="nav-item" id="nav-routine" onclick="showPanel('routine')"><i class="ti ti-scan-cube" style="font-size: 25px; color: rgba(255,0,0,0.75); text-shadow: none; "></i> Routine Manager</div>
+    <div class="nav-item" id="nav-notes" onclick="showPanel('notes')"><i class="ti ti-notebook" style="font-size: 25px; color: rgba(255,0,0,0.75); text-shadow: none; "></i> Notes Grid</div>
+    <div class="nav-item" id="nav-todos" onclick="showPanel('todos')"><i class="ti ti-banana" style="font-size: 25px; color: rgba(255,0,0,0.75); text-shadow: none; "></i> To-Do Tiles</div>
+    <div class="nav-item" id="nav-study" onclick="showPanel('study')"><i class="ti ti-stopwatch" style="font-size: 25px; color: rgba(255,0,0,0.75); text-shadow: none; "></i> Study Timers</div>
+    <div class="nav-item" id="nav-history" onclick="showPanel('history')"><i class="ti ti-spreadsheet" style="font-size: 25px; color: rgba(255,0,0,0.75); text-shadow: none; "></i> Matrix History</div>
 
     <div class="nav-section">Customization</div>
-    <div class="nav-item" id="nav-themes" onclick="showPanel('themes')"><i class="ti ti-palette"></i> Themes Matrix</div>
+    <div class="nav-item" id="nav-themes" onclick="showPanel('themes')"><i class="ti ti-palette" style="font-size: 25px; color: rgba(255,0,0,0.75); text-shadow: none; "></i> Themes Matrix</div>
 
     <div class="dev-mode-container" id="sidebar-developer-options-wrapper">
       <label class="switch-label" for="dev-mode-switch">
-        <span><i class="ti ti-terminal-2" style="color:var(--clr-red); margin-right:4px;"></i> Developer Options</span>
+        <span><i class="ti ti-terminal-2"  style="font-size: 20px; color: rgba(255,0,0,0.65); text-shadow: none; "margin-right:4px;"></i> Developer Options</span>
         <div class="switch-toggle">
           <input type="checkbox" id="dev-mode-switch">
           <span class="slider"></span>
