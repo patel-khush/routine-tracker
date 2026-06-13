@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MySpace - Ultimate Dark Ledger Dashboard</title>
+<title>Khush's Routine Tracker</title>
 <style>
 :root {
   --bg-app: transparent;
@@ -83,8 +83,8 @@ h1, .sidebar-logo, .card-val, .timer-digits, th, .tile-title {
   -webkit-backdrop-filter: blur(16px);
 }
 
-.sidebar-logo { padding: 0 24px 24px; font-size: 20px; font-weight: 500; letter-spacing: -0.3px; display: inline-block; }
-.sidebar-logo span { color: var(--clr-purple); -webkit-text-fill-color: var(--clr-purple); font-weight: 700; }
+.sidebar-logo { padding: 0 24px 24px; font-size: 20px; font-weight: 500; letter-spacing: 0.5px; display: inline-block; }
+.sidebar-logo span { color: var(--clr-purple); -webkit-text-fill-color: var(--clr-white); font-weight: 700; }
 
 .nav-section { font-size: 11px; color: var(--text-muted); padding: 20px 24px 8px; letter-spacing: 0.8px; text-transform: uppercase; font-weight: 600; text-shadow: none; }
 .nav-item { display: flex; align-items: center; gap: 12px; padding: 14px 24px; font-size: 16px; color: var(--text-secondary); cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); position: relative; }
@@ -282,15 +282,15 @@ input[type="date"] {
 
 <div id="access-gateway-overlay" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #0d0d11; z-index: 99999; display: flex; align-items: center; justify-content: center; font-family: 'DM Sans', sans-serif;">
   <div style="background: rgba(24, 24, 28, 0.9); padding: 40px; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.08); text-align: center; max-width: 400px; width: 100%; box-shadow: 0 10px 40px rgba(0,0,0,0.5); backdrop-filter: blur(20px);">
-    <h2 style="color: #fff; margin-bottom: 8px; font-weight: 500;">Welcome to MySpace</h2>
+    <h2 style="color: #fff; margin-bottom: 8px; font-weight: 500;">Welcome to Khush's Space</h2>
     <p style="color: #a1a1aa; font-size: 14px; margin-bottom: 30px;">Select your access profile credential type</p>
     
     <div id="gateway-selection-block" style="display: flex; flex-direction: column; gap: 14px;">
       <button id="gate-btn-visitor" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 14px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: 500; transition: background 0.2s;">
-        <i class="ti ti-eye" style="font-size: 25px; color: rgba(255,0,0,0.75); text-shadow: none; "></i> Visitor Login (View Only)
+        <i class="ti ti-user" style="font-size: 22px; color: rgba(0, 255, 21, 0.75); text-shadow: none; "></i> Visitor Login (View Only) <i class="ti ti-user" style="font-size: 22px; color: rgba(0, 255, 21, 0.75); text-shadow: none; "></i>
       </button>
       <button id="gate-btn-admin-prompt" style="background: #928ae9; border: none; color: #fff; padding: 14px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: 500; transition: background 0.2s;">
-        <i class="ti ti-info-triangle" style="font-size: 25px; color: rgba(255,0,0,0.75); text-shadow: none; "></i> Admin Login (Read/Write)
+        <i class="ti ti-user-cancel" style="font-size: 22px; color: rgba(255,0,0,0.75); text-shadow: none; "></i> Admin Login (Read/Write) <i class="ti ti-user-cancel" style="font-size: 22px; color: rgba(255,0,0,0.75); text-shadow: none; "></i>
       </button>
     </div>
 
@@ -307,25 +307,28 @@ input[type="date"] {
 
 <div class="app">
   <div class="sidebar">
-    <div class="sidebar-logo">My<span>Space</span></div>
+    <div class="sidebar-logo">
+    <i class="ti ti-atom-2"></i>
+    <span>Khush's Space</span>
+</div>
     
-    <div class="nav-section">Execution Engine</div>
-    <div class="nav-item active" id="nav-dashboard" onclick="showPanel('dashboard')"><i class="ti ti-home" style="font-size: 25px; color: rgba(255,0,0,0.75); text-shadow: none; "></i> Dashboard</div>
-    <div class="nav-item" id="nav-checkin" onclick="showPanel('checkin')"><i class="ti ti-checkup-list" style="font-size: 25px; color: rgba(255,0,0,0.75); text-shadow: none; "></i> Check-In</div>
+    <div class="nav-section">Focus Engine</div>
+    <div class="nav-item active" id="nav-dashboard" onclick="showPanel('dashboard')"><i class="ti ti-home" style="font-size: 25px; color: rgba(0,200,255,0.75); text-shadow: none; "></i> Dashboard</div>
+    <div class="nav-item" id="nav-checkin" onclick="showPanel('checkin')"><i class="ti ti-checkup-list" style="font-size: 25px; color: rgba(0, 200, 255, 0.75); text-shadow: none; "></i> Check-In</div>
     
     <div class="nav-section">Data Management</div>
-    <div class="nav-item" id="nav-routine" onclick="showPanel('routine')"><i class="ti ti-scan-cube" style="font-size: 25px; color: rgba(255,0,0,0.75); text-shadow: none; "></i> Routine Manager</div>
-    <div class="nav-item" id="nav-notes" onclick="showPanel('notes')"><i class="ti ti-notebook" style="font-size: 25px; color: rgba(255,0,0,0.75); text-shadow: none; "></i> Notes Grid</div>
-    <div class="nav-item" id="nav-todos" onclick="showPanel('todos')"><i class="ti ti-banana" style="font-size: 25px; color: rgba(255,0,0,0.75); text-shadow: none; "></i> To-Do Tiles</div>
-    <div class="nav-item" id="nav-study" onclick="showPanel('study')"><i class="ti ti-stopwatch" style="font-size: 25px; color: rgba(255,0,0,0.75); text-shadow: none; "></i> Study Timers</div>
-    <div class="nav-item" id="nav-history" onclick="showPanel('history')"><i class="ti ti-spreadsheet" style="font-size: 25px; color: rgba(255,0,0,0.75); text-shadow: none; "></i> Matrix History</div>
+    <div class="nav-item" id="nav-routine" onclick="showPanel('routine')"><i class="ti ti-scan-cube" style="font-size: 25px; color: rgba(200,0,255,0.75); text-shadow: none; "></i> Routine Manager</div>
+    <div class="nav-item" id="nav-notes" onclick="showPanel('notes')"><i class="ti ti-file-type-txt" style="font-size: 25px; color: rgba(200,0,255,0.75); text-shadow: none; "></i> Notes Centre</div>
+    <div class="nav-item" id="nav-todos" onclick="showPanel('todos')"><i class="ti ti-list-check" style="font-size: 25px; color: rgba(200,0,255,0.75); text-shadow: none; "></i> To-Do List</div>
+    <div class="nav-item" id="nav-study" onclick="showPanel('study')"><i class="ti ti-hourglass-high" style="font-size: 25px; color: rgba(200,0,255,0.75); text-shadow: none; "></i> Study Timers</div>
+    <div class="nav-item" id="nav-history" onclick="showPanel('history')"><i class="ti ti-chart-histogram" style="font-size: 25px; color: rgba(200, 0, 255, 0.75); text-shadow: none; "></i> Check-In History</div>
 
     <div class="nav-section">Customization</div>
-    <div class="nav-item" id="nav-themes" onclick="showPanel('themes')"><i class="ti ti-palette" style="font-size: 25px; color: rgba(255,0,0,0.75); text-shadow: none; "></i> Themes Matrix</div>
+    <div class="nav-item" id="nav-themes" onclick="showPanel('themes')"><i class="ti ti-texture" style="font-size: 25px; color: rgba(255,0,0,0.75); text-shadow: none; "></i> Themes Corner</div>
 
     <div class="dev-mode-container" id="sidebar-developer-options-wrapper">
       <label class="switch-label" for="dev-mode-switch">
-        <span><i class="ti ti-terminal-2"  style="font-size: 20px; color: rgba(255,0,0,0.65); text-shadow: none; "margin-right:4px;"></i> Developer Options</span>
+        <span><i class="ti ti-terminal-2" style="font-size: 25px; color: rgba(255, 0, 0, 0.75); text-shadow: none; " margin-right:4px;"></i> Developer Options</span>
         <div class="switch-toggle">
           <input type="checkbox" id="dev-mode-switch">
           <span class="slider"></span>
@@ -365,11 +368,11 @@ input[type="date"] {
 
       <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
         <div class="detail-panel">
-          <div class="panel-tabs"><div class="tab">Active Notes Workspace</div></div>
+          <div class="panel-tabs"><div class="tab">Notes</div></div>
           <div class="panel-body" id="dash-notes-preview" style="display:grid; grid-template-columns:1fr; gap:12px;"></div>
         </div>
         <div class="detail-panel">
-          <div class="panel-tabs"><div class="tab">Immediate Focus Checklist</div></div>
+          <div class="panel-tabs"><div class="tab">To-Do List</div></div>
           <div class="panel-body" id="dash-todos-preview" style="display:grid; grid-template-columns:1fr; gap:12px;"></div>
         </div>
       </div>
@@ -407,8 +410,8 @@ input[type="date"] {
           <table class="excel-table">
             <thead>
               <tr>
-                <th>Routine Activity Target Description</th>
-                <th>Assigned Metric / Track Window</th>
+                <th>Routine Activity</th>
+                <th>Target Time/Time Window</th>
                 <th style="width: 100px; text-align: center;">Status</th>
               </tr>
             </thead>
@@ -420,24 +423,24 @@ input[type="date"] {
 
     <div id="panel-routine" style="display:none">
       <div class="detail-panel" id="append-routine-block-panel" style="margin-bottom:24px;">
-        <div class="panel-tabs"><div class="tab">Append Routine Template Element</div></div>
+        <div class="panel-tabs"><div class="tab">Add Your Routine Target</div></div>
         <div class="panel-body">
           <div class="input-stack" style="grid-template-columns: 1fr 1fr auto;">
             <input type="text" id="mngr-text" placeholder="Activity name (e.g., Swim, Deep Sleep, Dance)">
             <input type="text" id="mngr-time" placeholder="Target value / Hour duration count (e.g., 2 Hours, Random)">
-            <button class="btn-core btn-purple" id="btn-mngr-add"><i class="ti ti-plus"></i> Add Profile</button>
+            <button class="btn-core btn-purple" id="btn-mngr-add"><i class="ti ti-plus"></i> Add Target</button>
           </div>
         </div>
       </div>
 
       <div class="detail-panel">
-        <div class="panel-tabs"><div class="tab">Master Configuration Matrix Index</div></div>
+        <div class="panel-tabs"><div class="tab">Manage Routine Targets</div></div>
         <div class="panel-body" style="padding:0;">
           <table class="excel-table">
             <thead>
               <tr>
-                <th>Routine Description Activity</th>
-                <th>Target Frame / Metric Count</th>
+                <th>Routine Activity</th>
+                <th>Target Time/Time Window</th>
                 <th style="width:120px; text-align:center;">Purge Entry</th>
               </tr>
             </thead>
@@ -450,11 +453,11 @@ input[type="date"] {
     <div id="panel-notes" style="display:none">
       <div class="keep-grid" id="notes-masonry-target"></div>
       <div class="detail-panel" id="compose-notes-block-panel">
-        <div class="panel-tabs"><div class="tab">Compose Note Board Entry</div></div>
+        <div class="panel-tabs"><div class="tab">Compose Note</div></div>
         <div class="panel-body">
-          <input type="text" id="note-title" placeholder="Note header concept mapping context..." style="width:100%; background:rgba(0,0,0,0.3); border:1px solid var(--border-color); color:#fff; padding:14px; border-radius:10px; font-size:16px; outline:none; margin-bottom:14px;">
-          <textarea id="note-content" rows="4" placeholder="Type down note workspace insights..." style="width:100%; background:rgba(0,0,0,0.3); border:1px solid var(--border-color); color:#fff; padding:14px; border-radius:10px; font-size:16px; outline:none; resize:vertical; font-family:inherit;"></textarea>
-          <button class="btn-core btn-purple" id="btn-submit-note" style="margin-top:14px; width:100%; justify-content:center;"><i class="ti ti-device-floppy"></i> Pin Workspace Card</button>
+          <input type="text" id="note-title" placeholder="Note header" style="width:100%; background:rgba(0,0,0,0.3); border:1px solid var(--border-color); color:#fff; padding:14px; border-radius:10px; font-size:16px; outline:none; margin-bottom:14px;">
+          <textarea id="note-content" rows="4" placeholder="Type down your thoughts..." style="width:100%; background:rgba(0,0,0,0.3); border:1px solid var(--border-color); color:#fff; padding:14px; border-radius:10px; font-size:16px; outline:none; resize:vertical; font-family:inherit;"></textarea>
+          <button class="btn-core btn-purple" id="btn-submit-note" style="margin-top:14px; width:100%; justify-content:center;"><i class="ti ti-device-floppy"></i> Add Note</button>
         </div>
       </div>
     </div>
@@ -462,11 +465,11 @@ input[type="date"] {
     <div id="panel-todos" style="display:none">
       <div class="keep-grid" id="todos-masonry-target"></div>
       <div class="detail-panel" id="compose-todos-block-panel">
-        <div class="panel-tabs"><div class="tab">Operational Target Tracking Workspace</div></div>
+        <div class="panel-tabs"><div class="tab">Essential Side Quests</div></div>
         <div class="panel-body">
           <div style="display:flex; gap:14px;">
             <input type="text" id="todo-text" placeholder="Specify upcoming tactical target objective (e.g., Buy umbrella tomorrow)..." style="flex:1; background:rgba(0,0,0,0.3); border:1px solid var(--border-color); color:#fff; padding:14px; border-radius:10px; font-size:16px; outline:none;">
-            <button class="btn-core btn-purple" id="btn-submit-todo"><i class="ti ti-plus"></i> Commit Target</button>
+            <button class="btn-core btn-purple" id="btn-submit-todo"><i class="ti ti-plus"></i> Commit Quest</button>
           </div>
         </div>
       </div>
@@ -485,31 +488,31 @@ input[type="date"] {
           <div class="card-label" style="justify-content:center;"><i class="ti ti-stopwatch"></i> Chronograph Tracker</div>
           <div class="timer-digits" id="stopwatch-display">00:00:00</div>
           <div style="display:flex; gap:12px; justify-content:center;" id="chronograph-buttons-block">
-            <button class="btn-core btn-green" id="btn-sw-start"><i class="ti ti-play"></i> Engage</button>
+            <button class="btn-core btn-green" id="btn-sw-start"><i class="ti ti-play"></i> Get Set Go...</button>
             <button class="btn-core" id="btn-sw-pause" style="display:none;"><i class="ti ti-pause"></i> Halt</button>
             <button class="btn-core" id="btn-sw-reset"><i class="ti ti-rotate-clockwise"></i> Reset & Log</button>
           </div>
         </div>
 
         <div class="timer-container">
-          <div class="card-label" style="justify-content:center;"><i class="ti ti-hourglass"></i> Countdown Interval Strategy</div>
+          <div class="card-label" style="justify-content:center;"><i class="ti ti-hourglass"></i> Countdown Interval Manager</div>
           <div style="margin: 16px 0; display: flex; align-items: center; justify-content: center; gap: 8px;">
             <input type="number" id="countdown-input-min" value="25" min="0" max="180" class="editable-timer-input" title="Adjust focus session duration minutes">
             <span style="font-size:44px; font-weight:700; font-family:monospace; color:var(--text-muted)">:</span>
             <input type="number" id="countdown-input-sec" value="00" min="0" max="59" class="editable-timer-input" title="Adjust focus session duration seconds">
           </div>
           <div style="display:flex; gap:12px; justify-content:center;" id="countdown-buttons-block">
-            <button class="btn-core btn-purple" id="btn-cd-start"><i class="ti ti-player-play"></i> Launch Block</button>
+            <button class="btn-core btn-purple" id="btn-cd-start"><i class="ti ti-player-play"></i> Start Timer</button>
             <button class="btn-core" id="btn-cd-pause" style="display:none;"><i class="ti ti-pause"></i> Interrupt</button>
-            <button class="btn-core" id="btn-cd-reset"><i class="ti ti-refresh"></i> Wipe Clear</button>
+            <button class="btn-core" id="btn-cd-reset"><i class="ti ti-refresh"></i> Clear</button>
           </div>
         </div>
       </div>
     </div>
 
-    <div id="panel-history" style="display:none; flex:1;">
-      <div style="display:flex; justify-content:flex-end; align-items:center; margin-bottom:16px; gap:12px;">
-        <span style="font-size:14px; color:var(--text-secondary); font-weight:500;">Horizon Interval Scale:</span>
+    <div id="panel-history" style="display:none; flex-direction:column; flex:1;">
+      <div style="display:flex; justify-content:flex-end; flex-shrink: 0; align-items:center; margin-bottom:16px; gap:12px;">
+        <span style="font-size:14px; color:var(--text-secondary); font-weight:500;">Checkin History Interval:</span>
         <select id="history-interval-selector" style="background:var(--bg-surface); border:1px solid var(--border-color); color:#fff; padding:8px 14px; border-radius:8px; font-size:14px; outline:none; cursor:pointer;">
           <option value="7">1 Week Window</option>
           <option value="30" selected>1 Month Window</option>
@@ -537,12 +540,12 @@ input[type="date"] {
 
   // Remember to paste your actual configuration details directly below!
   const firebaseConfig = {
-    apiKey: "",
-    authDomain: "",
-    projectId: "",
-    storageBucket: "",
-    messagingSenderId: "",
-    appId: ""
+    apiKey: "AIzaSyBJHpHCiwvBvAg2xL6vOr40oF0UPbpYz9c",
+    authDomain: "routine-tracker-01.firebaseapp.com",
+    projectId: "routine-tracker-01",
+    storageBucket: "routine-tracker-01.firebasestorage.app",
+    messagingSenderId: "578748981731",
+    appId: "1:578748981731:web:25131c7f3401eb9d4380d6"
   };
 
   const firebaseApp = initializeApp(firebaseConfig);
@@ -654,13 +657,13 @@ input[type="date"] {
   // --- CORE SYSTEM ROUTER ---
   const panelTitles = {
     dashboard: "Overview Workspace",
-    checkin: "Daily Operational Check-In",
-    routine: "Routine Template Index Profile",
-    notes: "Workspace Notes Tile Grid",
-    todos: "Tactical Schedule Target Tiles",
-    study: "Advanced Study Track Interface",
-    history: "Historical Spread Matrix Analytics",
-    themes: "System Visual Environments & Ambiance Matrix"
+    checkin: "Daily Check-In",
+    routine: "Routine Manager",
+    notes: "Notes Centre",
+    todos: "To-Do List Manager",
+    study: "Advanced Study Track Timer And Stopwatch",
+    history: "Historical Check-In Data",
+    themes: "Ambience Corner"
   };
 
   window.showPanel = function(panelId) {
@@ -942,7 +945,7 @@ input[type="date"] {
 
     const thead = document.createElement('thead');
     const headerRow = document.createElement('tr');
-    headerRow.innerHTML = `<th>Master Activity Register</th>`;
+    headerRow.innerHTML = `<th>Routine Activity</th>`;
     dateRangeSequence.forEach(d => {
       headerRow.innerHTML += `<th style="text-align:center; min-width:110px;">${d.headingLabel}</th>`;
     });
@@ -966,7 +969,7 @@ input[type="date"] {
         
         baseRowString += `
           <td style="text-align:center;">
-            <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:42px;">
+            <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:10px;">
               <div class="custom-checkbox-right ${stateValue?'checked':''} ${isDisabled?'disabled':''}" 
                    data-template-id="${t.id}" 
                    data-date-target="${d.isoString}" 
@@ -1233,7 +1236,7 @@ input[type="date"] {
             ${vetoMarkup}
           </div>
           <div class="tile-footer">
-            <span>Action Item Target Matrix</span>
+            <span>To-Do Target</span>
             ${trashMarkup}
           </div>
         `;
@@ -1315,23 +1318,10 @@ input[type="date"] {
         }
       }
     });
-  }
+}
 
-      // Restore elements focus state to stop jumping inputs during live synchronization resets
-      if (activeElementId) {
-        const restoredElement = document.getElementById(activeElementId);
-        if (restoredElement) {
-          restoredElement.focus();
-          if (selectionStart !== null && selectionEnd !== null && (restoredElement.type === 'text' || restoredElement.type === 'search')) {
-            restoredElement.setSelectionRange(selectionStart, selectionEnd);
-          }
-        }
-      }
-    ;
-  
-
-  const todoSubmitBtn = document.getElementById('btn-submit-todo');
-  if (todoSubmitBtn) {
+const todoSubmitBtn = document.getElementById('btn-submit-todo');
+if (todoSubmitBtn) {
     todoSubmitBtn.onclick = async () => {
       if (userAccessRole === "visitor") return;
       const text = document.getElementById('todo-text').value.trim();
@@ -1341,33 +1331,33 @@ input[type="date"] {
         text, 
         done: false, 
         timestamp: new Date().getTime(),
-        startDate: systemActiveDateString, // Track initialized baseline target start configuration date
+        startDate: systemActiveDateString, 
         completedDate: "--:--",
         veto: false
       });
       document.getElementById('todo-text').value = "";
     };
-  }
+}
 
-  // --- CHRONOGRAPH HARDWARE COMPONENT ENGINE ---
-  function runTimeFormatHMS(secs) {
+// --- CHRONOGRAPH HARDWARE COMPONENT ENGINE ---
+function runTimeFormatHMS(secs) {
     const h = String(Math.floor(secs / 3600)).padStart(2, '0');
     const m = String(Math.floor((secs % 3600) / 60)).padStart(2, '0');
     const s = String(secs % 60).padStart(2, '0');
     return `${h}:${m}:${s}`;
-  }
+}
 
-  let swInterval = null;
-  let swSeconds = 0;
-  let cdInterval = null;
-  let totalCdSecondsRemaining = 0;
+let swInterval = null;
+let swSeconds = 0;
+let cdInterval = null;
+let totalCdSecondsRemaining = 0;
 
-  const swStartBtn = document.getElementById('btn-sw-start');
-  const swPauseBtn = document.getElementById('btn-sw-pause');
-  const swResetBtn = document.getElementById('btn-sw-reset');
-  const swDisplay = document.getElementById('stopwatch-display');
+const swStartBtn = document.getElementById('btn-sw-start');
+const swPauseBtn = document.getElementById('btn-sw-pause');
+const swResetBtn = document.getElementById('btn-sw-reset');
+const swDisplay = document.getElementById('stopwatch-display');
 
-  if (swStartBtn) {
+if (swStartBtn) {
     swStartBtn.onclick = () => {
       if (userAccessRole === "visitor") return;
       swStartBtn.style.display = "none";
@@ -1410,7 +1400,7 @@ input[type="date"] {
         }
       }
     };
-  }
+}
 
   // Countdown Pomodoro Engine
   const cdStartBtn = document.getElementById('btn-cd-start');
