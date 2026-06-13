@@ -268,6 +268,11 @@ input:checked + .slider:before { transform: translateX(20px); background-color: 
 .action-i { cursor: pointer; color: var(--text-muted); transition: color 0.2s, transform 0.2s; }
 .action-i:hover { color: var(--clr-red); transform: scale(1.2); }
 
+/* System Level Form Factor Dark Override For Date Picker Inlines */
+input[type="date"] {
+  color-scheme: dark;
+}
+
 @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 </style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
@@ -457,7 +462,7 @@ input:checked + .slider:before { transform: translateX(20px); background-color: 
     <div id="panel-todos" style="display:none">
       <div class="keep-grid" id="todos-masonry-target"></div>
       <div class="detail-panel" id="compose-todos-block-panel">
-        <div class="panel-tabs"><div class="tab">Insert Action Item Target</div></div>
+        <div class="panel-tabs"><div class="tab">Operational Target Tracking Workspace</div></div>
         <div class="panel-body">
           <div style="display:flex; gap:14px;">
             <input type="text" id="todo-text" placeholder="Specify upcoming tactical target objective (e.g., Buy umbrella tomorrow)..." style="flex:1; background:rgba(0,0,0,0.3); border:1px solid var(--border-color); color:#fff; padding:14px; border-radius:10px; font-size:16px; outline:none;">
@@ -533,11 +538,11 @@ input:checked + .slider:before { transform: translateX(20px); background-color: 
   // Remember to paste your actual configuration details directly below!
   const firebaseConfig = {
     apiKey: "",
-  authDomain: "",
-  projectId: "",
-  storageBucket: "",
-  messagingSenderId: "",
-  appId: ""
+    authDomain: "",
+    projectId: "",
+    storageBucket: "",
+    messagingSenderId: "",
+    appId: ""
   };
 
   const firebaseApp = initializeApp(firebaseConfig);
@@ -1038,6 +1043,7 @@ input:checked + .slider:before { transform: translateX(20px); background-color: 
       renderCheckInView(cachedTemplates, cachedLogs);
       renderExcelHistoryMatrix(cachedTemplates, cachedLogs);
       renderStudyAccumulatedCard();
+      listenToTodosWorkspace(); // Synchronously forces evaluation updates over Checklist layout streams
     });
   }
 
@@ -1050,6 +1056,7 @@ input:checked + .slider:before { transform: translateX(20px); background-color: 
       renderCheckInView(cachedTemplates, cachedLogs);
       renderExcelHistoryMatrix(cachedTemplates, cachedLogs);
       renderStudyAccumulatedCard();
+      listenToTodosWorkspace(); // Triggers atomic date context tracking synchronizations
     });
   }
 
@@ -1148,15 +1155,35 @@ input:checked + .slider:before { transform: translateX(20px); background-color: 
   }
 
   // --- TO-DO ACTION ITEM INTERFACES ---
+  let activeTodosUnsubscribe = null;
   function listenToTodosWorkspace() {
+    if (activeTodosUnsubscribe) activeTodosUnsubscribe();
+    
     const q = query(collection(db, "todos"), orderBy("timestamp", "desc"));
-    onSnapshot(q, (snapshot) => {
+    activeTodosUnsubscribe = onSnapshot(q, (snapshot) => {
       const masonry = document.getElementById('todos-masonry-target');
       const dashPreview = document.getElementById('dash-todos-preview');
       if(!masonry) return;
 
+      // Track cursor position and focus state before clearing out the items
+      const activeElementId = document.activeElement ? document.activeElement.id : null;
+      const selectionStart = document.activeElement ? document.activeElement.selectionStart : null;
+      const selectionEnd = document.activeElement ? document.activeElement.selectionEnd : null;
+
       masonry.innerHTML = "";
       if(dashPreview) dashPreview.innerHTML = "";
+
+      // Internal helper to convert stored YYYY-MM-DD dates into standard DD/MM/YYYY view display
+      const formatToDDMMYYYY = (dateStr) => {
+        if (!dateStr || dateStr === "--:--" || dateStr === "undefined") return "";
+        if (dateStr.includes("-")) {
+          const parts = dateStr.split("-");
+          if (parts.length === 3 && parts[0].length === 4) {
+            return `${parts[2]}/${parts[1]}/${parts[0]}`;
+          }
+        }
+        return dateStr;
+      };
 
       let activeIndex = 0;
       snapshot.forEach(docSnap => {
@@ -1165,16 +1192,45 @@ input:checked + .slider:before { transform: translateX(20px); background-color: 
 
         const tile = document.createElement('div');
         tile.className = `keep-tile ${task.done ? 'todo-done' : ''}`;
+        
+        if (task.done && isDevModeActive) {
+          tile.style.opacity = "0.8";
+        }
+        
         tile.style.boxShadow = task.done ? 'none' : '0 6px 20px var(--clr-amber-glow)';
         if(!task.done) tile.style.borderColor = 'rgba(239, 159, 39, 0.2)';
 
-        const isDisabledCheckbox = (userAccessRole === "visitor") ? "disabled" : "";
+        const isDisabledCheckbox = (userAccessRole === "visitor" || (task.done && !isDevModeActive)) ? "disabled" : "";
         const trashMarkup = (userAccessRole === "visitor") ? "" : `<i class="ti ti-trash action-i" id="purge-td-${id}"></i>`;
+        
+        let startDateMarkup = "";
+        let completedDateMarkup = "";
+        
+        if (isDevModeActive && userAccessRole === "admin") {
+          startDateMarkup = `<input type="text" value="${formatToDDMMYYYY(task.startDate)}" placeholder="DD/MM/YYYY" id="edit-start-date-${id}" style="background:rgba(0,0,0,0.4); border:1px solid var(--border-color); color:#fff; padding:4px; font-size:12px; border-radius:6px; width:130px; outline:none; font-family:inherit;">`;
+          completedDateMarkup = `<input type="text" value="${formatToDDMMYYYY(task.completedDate)}" placeholder="DD/MM/YYYY" id="edit-completed-date-${id}" style="background:rgba(0,0,0,0.4); border:1px solid var(--border-color); color:#fff; padding:4px; font-size:12px; border-radius:6px; width:130px; outline:none; font-family:inherit;">`;
+        } else {
+          startDateMarkup = `<span style="color: var(--text-secondary); font-weight: 500;">${formatToDDMMYYYY(task.startDate) || '--:--'}</span>`;
+          completedDateMarkup = `<span style="color: var(--text-secondary); font-weight: 500;">${formatToDDMMYYYY(task.completedDate) || '--:--'}</span>`;
+        }
+
+        const vetoMarkup = task.veto ? `<div style="color:var(--clr-red); font-size:11px; font-weight:700; margin-top:4px;"><i class="ti ti-alert-triangle"></i> (Veto Decision)</div>` : '';
 
         tile.innerHTML = `
-          <div class="flex-row-align" style="align-items: flex-start; margin-bottom: 12px;">
-            <div class="tile-content" style="color:var(--text-primary); font-size:16px; margin-bottom:0; font-weight:500;">${task.text}</div>
+          <div class="flex-row-align" style="align-items: flex-start; margin-bottom: 8px;">
+            <div class="tile-content" style="color:var(--text-primary); font-size:16px; margin-bottom:0; font-weight:500;">${task.text || ''}</div>
             <div class="custom-checkbox-right ${task.done?'checked':''} ${isDisabledCheckbox}" id="chk-td-${id}"></div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; font-size: 12px; color: var(--text-muted); background: rgba(0,0,0,0.15); padding: 8px 10px; border-radius: 6px; border: 1px solid var(--border-color);">
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:4px;">
+              <span><i class="ti ti-calendar-event" style="color: var(--clr-purple);"></i> Start Date:</span> 
+              ${startDateMarkup}
+            </div>
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:4px;">
+              <span><i class="ti ti-calendar-check" style="color: var(--clr-green);"></i> Comp Date:</span> 
+              ${completedDateMarkup}
+            </div>
+            ${vetoMarkup}
           </div>
           <div class="tile-footer">
             <span>Action Item Target Matrix</span>
@@ -1183,9 +1239,49 @@ input:checked + .slider:before { transform: translateX(20px); background-color: 
         `;
 
         if (userAccessRole !== "visitor") {
-          tile.querySelector(`#chk-td-${id}`).onclick = async () => {
-            await updateDoc(doc(db, "todos", id), { done: !task.done });
-          };
+          const chkBox = tile.querySelector(`#chk-td-${id}`);
+          if (chkBox) {
+            chkBox.onclick = async () => {
+              if (!task.done) {
+                await updateDoc(doc(db, "todos", id), { 
+                  done: true,
+                  completedDate: systemActiveDateString,
+                  veto: isDevModeActive ? true : (task.veto || false)
+                });
+              } else if (task.done && isDevModeActive) {
+                await updateDoc(doc(db, "todos", id), { 
+                  done: false,
+                  completedDate: "--:--",
+                  veto: true
+                });
+              }
+            };
+          }
+
+          if (isDevModeActive && userAccessRole === "admin") {
+            const startInput = tile.querySelector(`#edit-start-date-${id}`);
+            const completedInput = tile.querySelector(`#edit-completed-date-${id}`);
+            
+            if(startInput) {
+              startInput.onchange = async (e) => {
+                await updateDoc(doc(db, "todos", id), {
+                  startDate: e.target.value.trim() || "--:--",
+                  veto: true
+                });
+              };
+            }
+            if(completedInput) {
+              completedInput.onchange = async (e) => {
+                await updateDoc(doc(db, "todos", id), {
+                  completedDate: e.target.value.trim() || "--:--",
+                  veto: true
+                });
+              };
+            }
+          }
+        }
+        
+        if (userAccessRole !== "visitor") {
           tile.querySelector(`#purge-td-${id}`).onclick = async () => {
             await deleteDoc(doc(db, "todos", id));
           };
@@ -1196,7 +1292,7 @@ input:checked + .slider:before { transform: translateX(20px); background-color: 
         if(dashPreview && !task.done && activeIndex < 2) {
           const lineRow = document.createElement('div');
           lineRow.style = "background:rgba(255,255,255,0.04); padding:12px; border-radius:10px; border:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center;";
-          lineRow.innerHTML = `<span><i class="ti ti-circle-dashed" style="color:var(--clr-amber); margin-right:8px;"></i>${task.text}</span>`;
+          lineRow.innerHTML = `<span><i class="ti ti-circle-dashed" style="color:var(--clr-amber); margin-right:8px;"></i>${task.text || ''}</span>`;
           dashPreview.appendChild(lineRow);
           activeIndex++;
         }
@@ -1205,8 +1301,34 @@ input:checked + .slider:before { transform: translateX(20px); background-color: 
       if(activeIndex === 0 && dashPreview) {
         dashPreview.innerHTML = `<div style="color:var(--text-muted);font-size:14px;">No upcoming dynamic target schedules logged in engine logs.</div>`;
       }
+
+      // Restore elements focus state to stop jumping inputs during live synchronization resets
+      if (activeElementId) {
+        const restoredElement = document.getElementById(activeElementId);
+        if (restoredElement) {
+          restoredElement.focus();
+          if (selectionStart !== null && selectionEnd !== null) {
+            try {
+              restoredElement.setSelectionRange(selectionStart, selectionEnd);
+            } catch(e) {}
+          }
+        }
+      }
     });
   }
+
+      // Restore elements focus state to stop jumping inputs during live synchronization resets
+      if (activeElementId) {
+        const restoredElement = document.getElementById(activeElementId);
+        if (restoredElement) {
+          restoredElement.focus();
+          if (selectionStart !== null && selectionEnd !== null && (restoredElement.type === 'text' || restoredElement.type === 'search')) {
+            restoredElement.setSelectionRange(selectionStart, selectionEnd);
+          }
+        }
+      }
+    ;
+  
 
   const todoSubmitBtn = document.getElementById('btn-submit-todo');
   if (todoSubmitBtn) {
@@ -1214,7 +1336,15 @@ input:checked + .slider:before { transform: translateX(20px); background-color: 
       if (userAccessRole === "visitor") return;
       const text = document.getElementById('todo-text').value.trim();
       if(!text) return;
-      await addDoc(collection(db, "todos"), { text, done: false, timestamp: new Date().getTime() });
+      
+      await addDoc(collection(db, "todos"), { 
+        text, 
+        done: false, 
+        timestamp: new Date().getTime(),
+        startDate: systemActiveDateString, // Track initialized baseline target start configuration date
+        completedDate: "--:--",
+        veto: false
+      });
       document.getElementById('todo-text').value = "";
     };
   }
