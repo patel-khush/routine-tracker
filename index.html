@@ -1382,6 +1382,9 @@ input[type="date"] {
         const id = docSnap.id;
         const task = docSnap.data();
 
+        // Hide todos from visitors unless admin has marked them visible
+        if (userAccessRole === "visitor" && !task.visibleToVisitor) return;
+
         const tile = document.createElement('div');
         tile.className = `keep-tile ${task.done ? 'todo-done' : ''}`;
         
@@ -1394,6 +1397,7 @@ input[type="date"] {
 
         const isDisabledCheckbox = (userAccessRole === "visitor" || (task.done && !isDevModeActive)) ? "disabled" : "";
         const trashMarkup = (userAccessRole === "visitor") ? "" : `<i class="ti ti-trash action-i" id="purge-td-${id}"></i>`;
+        const eyeMarkup = (userAccessRole !== "admin") ? "" : `<i class="ti ${task.visibleToVisitor ? 'ti-eye' : 'ti-eye-off'} action-i" id="vis-td-${id}" title="${task.visibleToVisitor ? 'Visible to visitors — click to hide' : 'Hidden from visitors — click to reveal'}" style="color:${task.visibleToVisitor ? 'var(--clr-green)' : 'var(--text-muted)'}; margin-right:6px;"></i>`;
         
         let startDateMarkup = "";
         let completedDateMarkup = "";
@@ -1426,7 +1430,7 @@ input[type="date"] {
           </div>
           <div class="tile-footer">
             <span>To-Do Target</span>
-            ${trashMarkup}
+            <div style="display:flex; align-items:center;">${eyeMarkup}${trashMarkup}</div>
           </div>
         `;
 
@@ -1477,6 +1481,15 @@ input[type="date"] {
           tile.querySelector(`#purge-td-${id}`).onclick = async () => {
             await deleteDoc(doc(db, "todos", id));
           };
+
+          if (userAccessRole === "admin") {
+            const eyeBtn = tile.querySelector(`#vis-td-${id}`);
+            if (eyeBtn) {
+              eyeBtn.onclick = async () => {
+                await updateDoc(doc(db, "todos", id), { visibleToVisitor: !task.visibleToVisitor });
+              };
+            }
+          }
         }
 
         masonry.appendChild(tile);
@@ -1522,7 +1535,8 @@ if (todoSubmitBtn) {
         timestamp: new Date().getTime(),
         startDate: systemActiveDateString, 
         completedDate: "--:--",
-        veto: false
+        veto: false,
+        visibleToVisitor: false
       });
       document.getElementById('todo-text').value = "";
     };
