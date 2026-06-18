@@ -470,7 +470,8 @@ input[type="date"] {
 <body>
 
 <div id="access-gateway-overlay" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #0d0d11; z-index: 99999; display: flex; align-items: center; justify-content: center; font-family: 'DM Sans', sans-serif;">
-  <div style="background: rgba(24, 24, 28, 0.9); padding: 40px; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.08); text-align: center; max-width: 400px; width: 100%; box-shadow: 0 10px 40px rgba(0,0,0,0.5); backdrop-filter: blur(20px);">
+  <video id="login-background-video" autoplay loop muted playsinline style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; z-index:-1; pointer-events:none;"></video>
+  <div style="background: rgba(24, 24, 28, 0.6); padding: 40px; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.08); text-align: center; max-width: 400px; width: 100%; box-shadow: 0 10px 40px rgba(0,0,0,0.5); backdrop-filter: blur(20px); position:relative; z-index:1;">
     <h2 style="color: #fff; margin-bottom: 8px; font-weight: 500;">Welcome to Khush's Space</h2>
     <p style="color: #a1a1aa; font-size: 14px; margin-bottom: 30px;">Select your access profile credential type</p>
     
@@ -568,6 +569,25 @@ input[type="date"] {
     </div>
 
     <div id="panel-themes" style="display:none">
+      <div id="themes-admin-controls" style="display:none; margin-bottom:14px;">
+        <div style="display:flex; gap:8px;">
+          <input id="theme-url-input" placeholder="Paste image or video URL (https://...jpg or .mp4)" style="flex:1; background:rgba(0,0,0,0.3); border:1px solid var(--border-color); color:#fff; padding:12px; border-radius:8px; outline:none;">
+          <input id="theme-title-input" placeholder="Title (optional)" style="width:180px; background:rgba(0,0,0,0.3); border:1px solid var(--border-color); color:#fff; padding:12px; border-radius:8px; outline:none;">
+          <button class="btn-core btn-green" id="btn-add-theme">Add Theme</button>
+        </div>
+        <div style="font-size:12px;color:var(--text-muted);margin-top:6px;">Only admins can add themes — themes are stored in cloud and referenced by URL.</div>
+      </div>
+      <div id="login-bg-admin-controls" style="display:none; margin-bottom:12px;">
+        <div style="display:flex; gap:8px; align-items:center;">
+          <input id="login-bg-url-input" placeholder="Paste login background URL (jpg/png/mp4)" style="flex:1; background:rgba(0,0,0,0.3); border:1px solid var(--border-color); color:#fff; padding:12px; border-radius:8px; outline:none;">
+          <select id="login-bg-type-select" style="background:rgba(0,0,0,0.3); border:1px solid var(--border-color); color:#fff; padding:10px 12px; border-radius:8px;">
+            <option value="image">Image</option>
+            <option value="video">Video</option>
+          </select>
+          <button class="btn-core btn-green" id="btn-set-login-bg">Apply</button>
+        </div>
+        <div style="font-size:12px;color:var(--text-muted);margin-top:6px;">Admin-only: set the login overlay background to a remote image or video.</div>
+      </div>
       <div class="keep-grid" id="themes-matrix-grid-container">
         
         <div class="keep-tile theme-matrix-card" id="matrix-theme-default" onclick="setTheme('default', 'color')" style="min-height: auto;">
@@ -790,6 +810,15 @@ input[type="date"] {
     }
     
     // Boot up the real-time core processes safely
+    // show/hide admin-only theme controls
+    const themesAdminControls = document.getElementById('themes-admin-controls');
+    if (themesAdminControls) themesAdminControls.style.display = (userAccessRole === 'admin') ? 'block' : 'none';
+    const loginBgAdminControls = document.getElementById('login-bg-admin-controls');
+    if (loginBgAdminControls) loginBgAdminControls.style.display = (userAccessRole === 'admin') ? 'block' : 'none';
+    document.querySelectorAll('.theme-delete-btn').forEach(btn => {
+      btn.classList.toggle('hidden', userAccessRole !== 'admin');
+    });
+
     systemBootCore();
   }
 
@@ -870,33 +899,60 @@ input[type="date"] {
   };
 
   // --- UNIVERSAL VISUAL ENVIRONMENT SWITCH ENGINE ---
+  // Cloud-backed theme map (docId -> theme data)
+  let themesMap = {};
+
   window.setTheme = function(themeId, themeType = 'image') {
     document.querySelectorAll('.theme-matrix-card').forEach(t => t.classList.remove('active-card'));
     const targetThemeCard = document.getElementById('matrix-theme-' + themeId);
     if(targetThemeCard) targetThemeCard.classList.add('active-card');
 
     const videoCanvas = document.getElementById('app-background-video-engine');
-    
     // Clear current background pipeline states
     if (videoCanvas) {
       videoCanvas.style.display = 'none';
       videoCanvas.src = '';
-      videoCanvas.muted = true; // Safe default reset state
+      videoCanvas.muted = true;
     }
     document.body.style.backgroundImage = 'none';
     document.body.style.backgroundColor = 'transparent';
 
+    // If themeId corresponds to a cloud theme doc, use its URL
+    if (themesMap && themesMap[themeId]) {
+      const theme = themesMap[themeId];
+      const tType = theme.type || themeType || 'image';
+      if (tType === 'video') {
+        if (videoCanvas) {
+          videoCanvas.src = theme.url;
+          videoCanvas.style.display = 'block';
+          videoCanvas.muted = false;
+          videoCanvas.play().catch(err => console.warn('Video playback error:', err));
+        }
+      } else {
+        document.body.style.backgroundImage = `url('${theme.url}')`;
+        document.body.style.backgroundSize = 'cover';
+        document.body.style.backgroundPosition = 'center';
+        document.body.style.backgroundRepeat = 'no-repeat';
+        document.body.style.backgroundAttachment = 'fixed';
+      }
+      localStorage.setItem('myspace_selected_theme', themeId);
+      localStorage.setItem('myspace_selected_theme_type', tType);
+      return;
+    }
+
+    // Fallbacks for built-in theme ids
     if(themeId === 'default') {
       document.body.style.backgroundColor = '#0d0d11';
     } else if(themeId === 'nebula') {
       document.body.style.backgroundImage = "linear-gradient(135deg, #09070f 0%, #110d1e 40%, #050508 100%)";
       document.body.style.backgroundAttachment = "fixed";
     } else {
+      // legacy local-filename behavior is no longer used for new cloud workflow
       if (themeType === 'video') {
         if (videoCanvas) {
           videoCanvas.src = `${themeId}.mp4`;
           videoCanvas.style.display = 'block';
-          videoCanvas.muted = false; // Play theme with audio track enabled on application
+          videoCanvas.muted = false;
           videoCanvas.play().catch(err => console.warn("Video playback initialized post-gesture sequence:", err));
         }
       } else {
@@ -913,67 +969,69 @@ input[type="date"] {
   };
 
   // --- AUTOMATED ASSET DISCOVERY SCANNING SYSTEM (CONCURRENT PROBING) ---
+  // Discover themes from cloud (Firestore collection 'themes') and render as tiles
   function discoverLocalWallpaperAssets() {
     const container = document.getElementById('themes-matrix-grid-container');
     if (!container) return;
 
-    const scanLimitThreshold = 50; // Safety scan window envelope scale (traps up to 50 assets)
-    const currentActiveTheme = localStorage.getItem('myspace_selected_theme') || 'default';
+    // Listen to `themes` collection in Firestore and render cloud-provided themes
+    const themesCol = collection(db, 'themes');
+    onSnapshot(themesCol, (snapshot) => {
+      // remove previously-rendered cloud tiles
+      container.querySelectorAll('[data-source="cloud"]').forEach(n => n.remove());
 
-    for (let i = 1; i <= scanLimitThreshold; i++) {
-      const fileNameIdentifier = `wallpaper${i}`;
-      
-      // Pipeline 1: Image Probe Test
-      const imgPath = `${fileNameIdentifier}.jpg`;
-      const probeImg = new Image();
-      probeImg.onload = function() {
+      snapshot.forEach(docSnap => {
+        const docId = docSnap.id;
+        const data = docSnap.data();
+        themesMap[docId] = data;
+
         const themeTile = document.createElement('div');
-        themeTile.className = "keep-tile theme-matrix-card";
-        themeTile.id = `matrix-theme-${fileNameIdentifier}`;
-        themeTile.style.minHeight = "auto";
-        themeTile.onclick = () => window.setTheme(fileNameIdentifier, 'image');
-        
+        themeTile.className = 'keep-tile theme-matrix-card';
+        themeTile.id = `matrix-theme-${docId}`;
+        themeTile.setAttribute('data-source', 'cloud');
+        themeTile.style.minHeight = 'auto';
+        themeTile.onclick = () => window.setTheme(docId, data.type || 'image');
+
+        let previewHtml = '';
+        if ((data.type || 'image') === 'video') {
+          previewHtml = `<div class="theme-preview-box" style="padding:0;"><video src="${data.url}" preload="metadata" style="width:100%; height:100%; object-fit:cover; pointer-events:none;"></video></div>`;
+        } else {
+          previewHtml = `<div class="theme-preview-box" style="background-image: url('${data.url}'); background-size:cover; background-position:center;"></div>`;
+        }
+
         themeTile.innerHTML = `
-          <div class="theme-preview-box" style="background-image: url('${imgPath}');"></div>
+          ${previewHtml}
           <div class="theme-card-footer">
-            <span class="tile-title" style="margin-bottom: 0; font-size: 14px;"><i class="ti ti-photo"></i> Wallpaper ${i}</span>
-            <span class="theme-type-label-badge">Image</span>
+            <span class="tile-title" style="margin-bottom: 0; font-size: 14px;">${data.title || 'Cloud Theme'}</span>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span class="theme-type-label-badge">${(data.type||'image') === 'video' ? 'Video' : 'Image'}</span>
+              <button type="button" class="theme-delete-btn${userAccessRole === 'admin' ? '' : ' hidden'}" title="Delete theme"><i class="ti ti-trash"></i></button>
+            </div>
           </div>
         `;
-        container.appendChild(themeTile);
-        if (currentActiveTheme === fileNameIdentifier) themeTile.classList.add('active-card');
-      };
-      probeImg.src = imgPath;
 
-      // Pipeline 2: Cinematic Video Metadata Probe Test (.mp4)
-      const vidPath = `${fileNameIdentifier}.mp4`;
-      const probeVid = document.createElement('video');
-      probeVid.src = vidPath;
-      probeVid.preload = 'metadata';
-      
-      probeVid.onloadedmetadata = function() {
-        const themeTile = document.createElement('div');
-        themeTile.className = "keep-tile theme-matrix-card";
-        themeTile.id = `matrix-theme-${fileNameIdentifier}`;
-        themeTile.style.minHeight = "auto";
-        themeTile.onclick = () => window.setTheme(fileNameIdentifier, 'video');
-        
-        themeTile.innerHTML = `
-          <div class="theme-preview-box" style="padding:0;">
-            <video src="${vidPath}" preload="metadata" style="width:100%; height:100%; object-fit:cover; pointer-events:none;"></video>
-          </div>
-          <div class="theme-card-footer">
-            <span class="tile-title" style="margin-bottom: 0; font-size: 14px;"><i class="ti ti-movie"></i> Motion ${i}</span>
-            <span class="theme-type-label-badge">Video</span>
-          </div>
-        `;
+        const deleteButton = themeTile.querySelector('.theme-delete-btn');
+        if (deleteButton) {
+          deleteButton.addEventListener('click', async (event) => {
+            event.stopPropagation();
+            if (userAccessRole !== 'admin') return;
+            if (!confirm('Delete this theme permanently?')) return;
+            try {
+              await deleteDoc(doc(db, 'themes', docId));
+            } catch (err) {
+              console.error('Theme delete failed:', err);
+              alert('Unable to delete theme. See console for details.');
+            }
+          });
+        }
+
         container.appendChild(themeTile);
-        if (currentActiveTheme === fileNameIdentifier) themeTile.classList.add('active-card');
-      };
-    }
+        if (localStorage.getItem('myspace_selected_theme') === docId) themeTile.classList.add('active-card');
+      });
+    });
   }
 
-  // Trigger dynamic environment map lookup instantly
+  // Trigger cloud-backed theme discovery
   discoverLocalWallpaperAssets();
   
   // Establish theme states on interface boot initialization
@@ -986,6 +1044,96 @@ input[type="date"] {
   let cachedTemplates = [];
   let cachedLogs = [];
   let cachedStudyLogs = [];
+
+  // Admin: add theme handler (writes to Firestore)
+  const addThemeBtn = document.getElementById('btn-add-theme');
+  if (addThemeBtn) {
+    addThemeBtn.onclick = async () => {
+      if (userAccessRole !== 'admin') { alert('Only admins may add themes.'); return; }
+      const url = document.getElementById('theme-url-input').value.trim();
+      const title = document.getElementById('theme-title-input').value.trim() || 'Cloud Theme';
+      if (!url) { alert('Please paste a valid image or video URL.'); return; }
+      const isVideo = url.endsWith('.mp4') || url.indexOf('video') !== -1;
+      try {
+        await addDoc(collection(db, 'themes'), { url, title, type: isVideo ? 'video' : 'image', createdAt: new Date().toISOString() });
+        document.getElementById('theme-url-input').value = '';
+        document.getElementById('theme-title-input').value = '';
+        alert('Theme added successfully.');
+      } catch (err) {
+        console.error('Failed to add theme:', err);
+        alert('Failed to add theme. See console for details.');
+      }
+    };
+  }
+
+  // --- LOGIN BACKGROUND (admin-only) ---
+  function applyLoginBackground(bg) {
+    const overlay = document.getElementById('access-gateway-overlay');
+    const loginVideo = document.getElementById('login-background-video');
+    if (!overlay) return;
+
+    if (!bg || !bg.url) {
+      // reset to default
+      overlay.style.background = '#0d0d11';
+      if (loginVideo) { loginVideo.style.display = 'none'; loginVideo.src = ''; }
+      return;
+    }
+
+    if ((bg.type || 'image') === 'video') {
+      overlay.style.background = 'transparent';
+      if (loginVideo) {
+        loginVideo.src = bg.url;
+        loginVideo.style.display = 'block';
+        loginVideo.muted = true;
+        loginVideo.play().catch(() => {});
+      }
+    } else {
+      // image
+      if (loginVideo) { loginVideo.style.display = 'none'; loginVideo.src = ''; }
+      overlay.style.backgroundImage = `url('${bg.url}')`;
+      overlay.style.backgroundSize = 'cover';
+      overlay.style.backgroundPosition = 'center';
+      overlay.style.backgroundRepeat = 'no-repeat';
+    }
+  }
+
+  // Listen for latest login background from Firestore collection 'login_background'
+  (function listenLoginBackground() {
+    const col = collection(db, 'login_background');
+    onSnapshot(col, (snapshot) => {
+      let latest = null;
+      snapshot.forEach(snap => {
+        const d = snap.data();
+        if (!d) return;
+        if (!latest) latest = d;
+        else {
+          const a = new Date(d.createdAt || 0).getTime();
+          const b = new Date(latest.createdAt || 0).getTime();
+          if (a > b) latest = d;
+        }
+      });
+      applyLoginBackground(latest);
+    });
+  })();
+
+  // Admin action: set login background
+  const setLoginBgBtn = document.getElementById('btn-set-login-bg');
+  if (setLoginBgBtn) {
+    setLoginBgBtn.onclick = async () => {
+      if (userAccessRole !== 'admin') { alert('Only admins may change login background.'); return; }
+      const url = document.getElementById('login-bg-url-input').value.trim();
+      const type = document.getElementById('login-bg-type-select').value || 'image';
+      if (!url) { alert('Provide a URL for the login background.'); return; }
+      try {
+        await addDoc(collection(db, 'login_background'), { url, type, createdAt: new Date().toISOString(), createdBy: (auth.currentUser && auth.currentUser.email) ? auth.currentUser.email : 'unknown' });
+        document.getElementById('login-bg-url-input').value = '';
+        alert('Login background updated.');
+      } catch (err) {
+        console.error('Failed to set login background:', err);
+        alert('Failed to set login background. See console for details.');
+      }
+    };
+  }
 
   // ROUTINE MANAGER CONTROLLER
   function renderRoutineManager(templates) {
